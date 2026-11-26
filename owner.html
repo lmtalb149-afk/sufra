@@ -1,8 +1,155 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>لوحة المالك - سُفرة</title><style>*{box-sizing:border-box;font-family:Arial;margin:0}body{background:#0a0a0a;color:#fff;padding:15px}h1 span{color:#c9a227}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}.card{background:#141414;border:1px solid #c9a227;border-radius:16px;padding:15px;text-align:center}.card b{font-size:22px;display:block}.card span{color:#aaa;font-size:12px}.box{background:#141414;border:1px solid #222;border-radius:16px;padding:15px;margin:10px 0}button{padding:10px 15px;border-radius:20px;border:0;background:#c9a227;font-weight:900;margin:5px;cursor:pointer}a{color:#c9a227}</style></head><body>
-<h1>👑 لوحة المالك <span>سُفرة</span></h1><p style="color:#aaa">أهلاً أسامة - هذه أرباحك</p>
-<div class="grid"><div class="card"><b>1</b><span>مطعم مسجل</span></div><div class="card"><b>0 ر.ي</b><span>أرباح هذا الشهر</span></div><div class="card"><b>14 يوم</b><span>تجربة مجانية</span></div><div class="card"><b>6000 ر.ي</b><span>سعر الاشتراك الشهري</span></div></div>
-<div class="box"><h3>📋 المطاعم المسجلة</h3><p id="rests">لا يوجد مطاعم بعد - لما يسجل مطعم بيطلع هنا</p></div>
-<div class="box"><h3>💰 حساب الأرباح</h3><p>لو عندك 10 مطاعم × 6000 = <b style="color:#c9a227">60,000 ر.ي شهرياً</b></p><p>لو عندك 50 مطعم × 6000 = <b style="color:#c9a227">300,000 ر.ي شهرياً</b></p></div>
-<a href="index.html">← رجوع</a>
-<script>let r=localStorage.getItem('sufra_rest');if(r){let j=JSON.parse(r);document.getElementById('rests').innerHTML='✅ '+j.name+' - '+j.city+' - '+j.phone+' - تجربة 14 يوم';}</script></body></html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>لوحة المالك - سفرة</title>
+<style>
+*{box-sizing:border-box;font-family:system-ui,Tahoma}
+body{background:#f7f5f2;margin:0;padding:16px}
+.card{background:#fff;border-radius:16px;padding:16px;margin-bottom:16px;box-shadow:0 2px 10px #0001}
+h2{margin:0 0 12px}.row{display:flex;gap:8px;flex-wrap:wrap}
+input,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin-bottom:8px}
+button{padding:10px 14px;border:0;border-radius:10px;cursor:pointer;font-weight:700}
+.btn-green{background:#16a34a;color:#fff}.btn-orange{background:#f97316;color:#fff}
+.btn-red{background:#ef4444;color:#fff}.btn-gray{background:#eee}
+.badge{padding:4px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.active{background:#dcfce7;color:#166534}.expired{background:#fee2e2;color:#991b1b}
+.rest{display:flex;justify-content:space-between;gap:10px;border:1px solid #eee;border-radius:12px;padding:12px;margin-bottom:10px}
+</style>
+</head>
+<body>
+
+<h1>🍽️ لوحة المالك - سفرة</h1>
+<p>أهلاً <b id="ownerNameDisplay">أسامة</b> 👋</p>
+
+<!-- الإعدادات -->
+<div class="card">
+<h2>⚙️ الإعدادات</h2>
+<label>اسم المالك</label>
+<input id="ownerName" value="أسامة">
+<label>كلمة المرور القديمة</label>
+<input id="oldPass" type="password" placeholder="القديمة">
+<label>كلمة المرور الجديدة</label>
+<input id="newPass" type="password" placeholder="الجديدة">
+<button class="btn-green" onclick="saveOwner()">حفظ بيانات المالك</button>
+<hr>
+<h3>💰 أسعار الباقات - نفس الموقع</h3>
+<label>شهري</label><input id="p_monthly" type="number" value="15000">
+<label>3 شهور</label><input id="p_3months" type="number" value="40000">
+<label>سنوي</label><input id="p_yearly" type="number" value="120000">
+<label>تجريبي (أيام مجانية)</label><input id="p_trial" type="number" value="14">
+<button class="btn-green" onclick="savePrices()">حفظ الأسعار</button>
+<p id="priceNote" style="color:green"></p>
+</div>
+
+<!-- إضافة مطعم -->
+<div class="card">
+<h2>➕ إضافة مطعم جديد</h2>
+<input id="rName" placeholder="اسم المطعم - مثلاً مطعم الشيباني">
+<input id="rOwner" placeholder="اسم صاحب المطعم">
+<input id="rPhone" placeholder="رقم الجوال - 777xxxxxx">
+<select id="rPlan">
+<option value="trial">تجريبي مجاني - 14 يوم - 0 ر.ي</option>
+<option value="monthly">شهري - 15,000 ر.ي</option>
+<option value="3months">3 شهور - 40,000 ر.ي</option>
+<option value="yearly">سنوي - 120,000 ر.ي</option>
+</select>
+<button class="btn-orange" onclick="addRestaurant()">توليد حساب + إضافة المطعم</button>
+<div id="generated" style="background:#fff7ed;padding:10px;border-radius:10px;margin-top:10px;display:none"></div>
+</div>
+
+<!-- قائمة المطاعم -->
+<div class="card">
+<h2>📋 المطاعم والاشتراكات</h2>
+<div id="list"></div>
+</div>
+
+<script>
+let prices = JSON.parse(localStorage.getItem('sufra_prices')||'{"monthly":15000,"3months":40000,"yearly":120000,"trial":14}');
+let restaurants = JSON.parse(localStorage.getItem('sufra_restaurants')||'[]');
+
+// عرض الأسعار المحفوظة
+document.getElementById('p_monthly').value=prices.monthly;
+document.getElementById('p_3months').value=prices['3months'];
+document.getElementById('p_yearly').value=prices.yearly;
+document.getElementById('p_trial').value=prices.trial;
+updatePlanSelect();
+
+function updatePlanSelect(){
+ document.getElementById('rPlan').innerHTML=`
+ <option value="trial">تجريبي مجاني - ${prices.trial} يوم - 0 ر.ي</option>
+ <option value="monthly">شهري - ${prices.monthly.toLocaleString()} ر.ي</option>
+ <option value="3months">3 شهور - ${prices['3months'].toLocaleString()} ر.ي</option>
+ <option value="yearly">سنوي - ${prices.yearly.toLocaleString()} ر.ي</option>`;
+}
+
+function saveOwner(){
+ let name=document.getElementById('ownerName').value;
+ let oldP=document.getElementById('oldPass').value;
+ let newP=document.getElementById('newPass').value;
+ if(!name) return alert('اكتب اسمك');
+ localStorage.setItem('sufra_owner_name',name);
+ document.getElementById('ownerNameDisplay').innerText=name;
+ if(newP){
+   if(!oldP) return alert('اكتب كلمة المرور القديمة');
+   // هنا تتحقق من القديمة في مشروعك الحقيقي
+   localStorage.setItem('sufra_owner_pass',newP);
+ }
+ alert('تم حفظ بيانات المالك ✅');
+}
+
+function savePrices(){
+ prices={monthly:+document.getElementById('p_monthly').value,'3months':+document.getElementById('p_3months').value,yearly:+document.getElementById('p_yearly').value,trial:+document.getElementById('p_trial').value};
+ localStorage.setItem('sufra_prices',JSON.stringify(prices));
+ updatePlanSelect(); render();
+ document.getElementById('priceNote').innerText='تم حفظ الأسعار ✅ وهي الآن نفس أسعار الموقع';
+}
+
+function addRestaurant(){
+ let name=document.getElementById('rName').value;
+ let owner=document.getElementById('rOwner').value;
+ let phone=document.getElementById('rPhone').value;
+ let plan=document.getElementById('rPlan').value;
+ if(!name||!phone) return alert('اكتب اسم المطعم ورقم الجوال');
+ let days = plan==='trial'?prices.trial : plan==='monthly'?30 : plan==='3months'?90 : 365;
+ let end=new Date(); end.setDate(end.getDate()+days);
+ let user=name.replace(/\s/g,'_')+'_'+Math.floor(Math.random()*100);
+ let pass='Sufra@'+Math.floor(1000+Math.random()*9000);
+ restaurants.push({name,owner,phone,plan,end:end.toISOString(),user,pass,created:new Date().toISOString()});
+ localStorage.setItem('sufra_restaurants',JSON.stringify(restaurants));
+ document.getElementById('generated').style.display='block';
+ document.getElementById('generated').innerHTML=`<b>تم ✅ ارسل للتاجر:</b><br>المطعم: ${name}<br>اسم المستخدم: <b>${user}</b><br>كلمة المرور: <b>${pass}</b><br>ينتهي: ${end.toLocaleDateString('ar-YE')}`;
+ render();
+}
+
+function renew(i){
+ let r=restaurants[i];
+ let days = r.plan==='trial'?prices.trial : r.plan==='monthly'?30 : r.plan==='3months'?90 : 365;
+ let end=new Date(r.end); if(end<new Date()) end=new Date();
+ end.setDate(end.getDate()+days); r.end=end.toISOString();
+ localStorage.setItem('sufra_restaurants',JSON.stringify(restaurants)); render();
+ alert('تم تجديد اشتراك '+r.name+' ✅');
+}
+
+function delRestaurant(i){
+ if(!confirm('متأكد تحذف '+restaurants[i].name+' ؟')) return;
+ restaurants.splice(i,1);
+ localStorage.setItem('sufra_restaurants',JSON.stringify(restaurants)); render();
+}
+
+function render(){
+ let html='';
+ if(!restaurants.length) html='<p>لا يوجد مطاعم بعد</p>';
+ restaurants.forEach((r,i)=>{
+  let end=new Date(r.end); let diff=Math.ceil((end-new Date())/(1000*60*60*24));
+  let planName = r.plan==='trial'?'تجريبي':r.plan==='monthly'?'شهري':r.plan==='3months'?'3 شهور':'سنوي';
+  let price = r.plan==='trial'?0:prices[r.plan];
+  html+=`<div class="rest"><div><b>${r.name}</b><br>👤 ${r.owner||''} - 📞 ${r.phone}<br>📦 ${planName} - ${price.toLocaleString()} ر.ي<br>📅 ينتهي: ${end.toLocaleDateString('ar-YE')} - باقي ${diff} يوم<br><span class="badge ${diff>=0?'active':'expired'}">${diff>=0?'نشط ✅':'منتهي ❌'}</span><br>🔑 ${r.user} / ${r.pass}</div><div style="display:flex;flex-direction:column;gap:6px"><button class="btn-green" onclick="renew(${i})">تجديد</button><button class="btn-red" onclick="delRestaurant(${i})">حذف</button></div></div>`;
+ });
+ document.getElementById('list').innerHTML=html;
+}
+render();
+</script>
+</body>
+</html>
