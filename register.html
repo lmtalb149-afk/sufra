@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>سجل مطعمك - سُفرة</title><style>*{box-sizing:border-box;font-family:Arial;margin:0}body{background:#0a0a0a;color:#fff;padding:20px}.box{max-width:500px;margin:auto;background:#141414;border:1px solid #222;border-radius:20px;padding:25px}h1{text-align:center}h1 span{color:#c9a227}p{text-align:center;color:#aaa;margin:10px 0 20px;font-size:14px}label{display:block;margin:15px 0 5px;font-weight:bold}input,select{width:100%;padding:13px;border-radius:12px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:15px}button{width:100%;padding:15px;border-radius:30px;border:0;background:linear-gradient(135deg,#f5d76e,#c9a227);font-weight:900;font-size:16px;margin-top:20px;cursor:pointer}.back{display:block;text-align:center;color:#c9a227;margin-top:15px}</style></head><body>
+<div class="box"><h1>🍽️ سجل مطعمك في <span>سُفرة</span></h1><p>14 يوم مجاناً - بدون بطاقة - فعل مطعمك في 2 دقيقة</p>
+<label>اسم المطعم</label><input id="name" placeholder="مثال: مطعم السعيدة">
+<label>اسم صاحب المطعم</label><input id="owner" placeholder="مثال: محمد أحمد">
+<label>رقم الواتساب</label><input id="phone" placeholder="77XXXXXXX">
+<label>المدينة</label><select id="city"><option>صنعاء</option><option>عدن</option><option>تعز</option><option>إب</option><option>الحديدة</option><option>حضرموت</option><option>ذمار</option><option>أخرى</option></select>
+<label>نوع المطعم</label><select id="type"><option>مندي ومظبي</option><option>فحسة وسلتة</option><option>مشاوي</option><option>أسماك</option><option>برجر ووجبات سريعة</option><option>كافيه</option><option>أخرى</option></select>
+<button onclick="reg()">🚀 سجل وابدأ 14 يوم مجاناً</button>
+<a class="back" href="index.html">← رجوع للرئيسية</a>
+</div><script>
+function reg(){let n=document.getElementById('name').value;if(!n){alert('اكتب اسم المطعم');return}localStorage.setItem('sufra_rest',JSON.stringify({name:n,owner:document.getElementById('owner').value,phone:document.getElementById('phone').value,city:document.getElementById('city').value,type:document.getElementById('type').value,trial:14}));alert('مبروك! تم تسجيل '+n+'\nلك 14 يوم مجاناً\nالآن ادخل لوحة المطعم');location.href='login.html'}
+</script></body></html>

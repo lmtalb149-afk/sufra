@@ -1,0 +1,8 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>لوحة المالك - سُفرة</title><style>*{box-sizing:border-box;font-family:Arial;margin:0}body{background:#0a0a0a;color:#fff;padding:15px}h1 span{color:#c9a227}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:15px 0}.card{background:#141414;border:1px solid #c9a227;border-radius:16px;padding:15px;text-align:center}.card b{font-size:22px;display:block}.card span{color:#aaa;font-size:12px}.box{background:#141414;border:1px solid #222;border-radius:16px;padding:15px;margin:10px 0}button{padding:10px 15px;border-radius:20px;border:0;background:#c9a227;font-weight:900;margin:5px;cursor:pointer}a{color:#c9a227}</style></head><body>
+<h1>👑 لوحة المالك <span>سُفرة</span></h1><p style="color:#aaa">أهلاً أسامة - هذه أرباحك</p>
+<div class="grid"><div class="card"><b>1</b><span>مطعم مسجل</span></div><div class="card"><b>0 ر.ي</b><span>أرباح هذا الشهر</span></div><div class="card"><b>14 يوم</b><span>تجربة مجانية</span></div><div class="card"><b>6000 ر.ي</b><span>سعر الاشتراك الشهري</span></div></div>
+<div class="box"><h3>📋 المطاعم المسجلة</h3><p id="rests">لا يوجد مطاعم بعد - لما يسجل مطعم بيطلع هنا</p></div>
+<div class="box"><h3>💰 حساب الأرباح</h3><p>لو عندك 10 مطاعم × 6000 = <b style="color:#c9a227">60,000 ر.ي شهرياً</b></p><p>لو عندك 50 مطعم × 6000 = <b style="color:#c9a227">300,000 ر.ي شهرياً</b></p></div>
+<a href="index.html">← رجوع</a>
+<script>let r=localStorage.getItem('sufra_rest');if(r){let j=JSON.parse(r);document.getElementById('rests').innerHTML='✅ '+j.name+' - '+j.city+' - '+j.phone+' - تجربة 14 يوم';}</script></body></html>
