@@ -30,6 +30,7 @@
 let myRest=null;
 function doRegister(){
  let name=document.getElementById('rName').value, owner=document.getElementById('rOwner').value, phone=document.getElementById('rPhone').value, pass=document.getElementById('rPass').value;
+ let allCheck=JSON.parse(localStorage.getItem('sufra_restaurants')||'[]'); if(allCheck.some(r=>r.phone===phone)){alert('هذا الرقم قد أخذ تجربته المجانية من قبل'); return;}
  if(!name||!phone||!pass) return alert('عبّي كل البيانات');
  let user=name.replace(/\s/g,'_')+'_'+Math.floor(Math.random()*100);
  let end=new Date(); end.setDate(end.getDate()+14);
