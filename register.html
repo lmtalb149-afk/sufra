@@ -1,13 +1,56 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>سجل مطعمك - سُفرة</title><style>*{box-sizing:border-box;font-family:Arial;margin:0}body{background:#0a0a0a;color:#fff;padding:20px}.box{max-width:500px;margin:auto;background:#141414;border:1px solid #222;border-radius:20px;padding:25px}h1{text-align:center}h1 span{color:#c9a227}p{text-align:center;color:#aaa;margin:10px 0 20px;font-size:14px}label{display:block;margin:15px 0 5px;font-weight:bold}input,select{width:100%;padding:13px;border-radius:12px;border:1px solid #333;background:#1a1a1a;color:#fff;font-size:15px}button{width:100%;padding:15px;border-radius:30px;border:0;background:linear-gradient(135deg,#f5d76e,#c9a227);font-weight:900;font-size:16px;margin-top:20px;cursor:pointer}.back{display:block;text-align:center;color:#c9a227;margin-top:15px}</style></head><body>
-<div class="box"><h1>🍽️ سجل مطعمك في <span>سُفرة</span></h1><p>14 يوم مجاناً - بدون بطاقة - فعل مطعمك في 2 دقيقة</p>
-<label>اسم المطعم</label><input id="name" placeholder="مثال: مطعم السعيدة">
-<label>اسم صاحب المطعم</label><input id="owner" placeholder="مثال: محمد أحمد">
-<label>رقم الواتساب</label><input id="phone" placeholder="77XXXXXXX">
-<label>المدينة</label><select id="city"><option>صنعاء</option><option>عدن</option><option>تعز</option><option>إب</option><option>الحديدة</option><option>حضرموت</option><option>ذمار</option><option>أخرى</option></select>
-<label>نوع المطعم</label><select id="type"><option>مندي ومظبي</option><option>فحسة وسلتة</option><option>مشاوي</option><option>أسماك</option><option>برجر ووجبات سريعة</option><option>كافيه</option><option>أخرى</option></select>
-<button onclick="reg()">🚀 سجل وابدأ 14 يوم مجاناً</button>
-<a class="back" href="index.html">← رجوع للرئيسية</a>
-</div><script>
-function reg(){let n=document.getElementById('name').value;if(!n){alert('اكتب اسم المطعم');return}localStorage.setItem('sufra_rest',JSON.stringify({name:n,owner:document.getElementById('owner').value,phone:document.getElementById('phone').value,city:document.getElementById('city').value,type:document.getElementById('type').value,trial:14}));alert('مبروك! تم تسجيل '+n+'\nلك 14 يوم مجاناً\nالآن ادخل لوحة المطعم');location.href='login.html'}
+<html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>جرب مجاناً - سفرة</title>
+<style>*{box-sizing:border-box;font-family:system-ui,Tahoma}body{background:#0f172a;color:#fff;margin:0;padding:16px}.card{background:#fff;color:#222;border-radius:16px;padding:16px;max-width:450px;margin:20px auto}input,select{width:100%;padding:12px;border:1px solid #ddd;border-radius:10px;margin-bottom:8px}button{width:100%;padding:13px;border:0;border-radius:10px;font-weight:700;cursor:pointer}.btn-green{background:#16a34a;color:#fff}.btn-wa{background:#25D366;color:#fff;margin-top:8px}img{max-width:200px}</style></head>
+<body>
+<div class="card" id="formBox">
+<h1 style="text-align:center">🍽️ جرب سفرة مجاناً 14 يوم</h1>
+<p style="text-align:center;color:#666">سجل و يشتغل موقعك + QR مباشرة</p>
+<input id="rName" placeholder="اسم المطعم">
+<input id="rOwner" placeholder="اسم صاحب المطعم">
+<input id="rPhone" placeholder="رقم جوالك">
+<input id="rPass" type="password" placeholder="اختار كلمة مرور لمطعمك">
+<button class="btn-green" onclick="doRegister()">تفعيل التجريبي المجاني + توليد QR ✅</button>
+<p style="text-align:center"><a href="index.html">رجوع</a></p>
+</div>
+
+<div class="card" id="doneBox" style="display:none;text-align:center">
+<h2>🎉 مبروك! مطعمك اشتغل</h2>
+<p id="info"></p>
+<h3>امسح QR لعرض قائمتك</h3>
+<img id="qrImg"><br><br>
+<p>رابط قائمتك:</p><a id="menuLink" target="_blank"></a><br><br>
+<button class="btn-green" onclick="goLogin()">دخول لوحة مطعمي</button>
+<button class="btn-wa" onclick="sendWA('تجريبي')">📱 أرسل للمالك واتساب أني سجلت</button>
+<hr>
+<h3>عجبك الموقع؟ اشترك الآن</h3>
+<select id="plan"><option value="monthly">شهري - 15,000 ر.ي</option><option value="3months">3 شهور - 40,000 ر.ي</option><option value="yearly">سنوي - 120,000 ر.ي</option></select>
+<button class="btn-green" onclick="requestSub()">اطلب اشتراك + أرسل واتساب</button>
+</div>
+<script>
+let myRest=null;
+function doRegister(){
+ let name=document.getElementById('rName').value, owner=document.getElementById('rOwner').value, phone=document.getElementById('rPhone').value, pass=document.getElementById('rPass').value;
+ if(!name||!phone||!pass) return alert('عبّي كل البيانات');
+ let user=name.replace(/\s/g,'_')+'_'+Math.floor(Math.random()*100);
+ let end=new Date(); end.setDate(end.getDate()+14);
+ myRest={name,owner,phone,plan:'trial',end:end.toISOString(),user,pass,status:'trial'};
+ let all=JSON.parse(localStorage.getItem('sufra_restaurants')||'[]'); all.push(myRest); localStorage.setItem('sufra_restaurants',JSON.stringify(all));
+ let link=location.origin+'/menu.html?r='+user;
+ document.getElementById('formBox').style.display='none'; document.getElementById('doneBox').style.display='block';
+ document.getElementById('info').innerHTML=`المطعم: <b>${name}</b><br>يوزر: <b>${user}</b><br>باسورد: <b>${pass}</b><br>ينتهي التجريبي: ${end.toLocaleDateString('ar-YE')}`;
+ document.getElementById('qrImg').src='https://api.qrserver.com/v1/create-qr-code/?size=200x200&data='+encodeURIComponent(link);
+ document.getElementById('menuLink').href=link; document.getElementById('menuLink').innerText=link;
+}
+function sendWA(type){
+ let plan=document.getElementById('plan')?.value||'تجريبي';
+ let planName= plan==='monthly'?'شهري 15,000':plan==='3months'?'3 شهور 40,000':plan==='yearly'?'سنوي 120,000':'تجريبي مجاني 14 يوم';
+ let msg=`مرحباً أسامة، أنا مطعم ${myRest.name}، رقمي ${myRest.phone}، سجلت في سفرة وأبغى ${planName}`;
+ window.open('https://wa.me/967774907728?text='+encodeURIComponent(msg),'_blank');
+}
+function requestSub(){
+ let plan=document.getElementById('plan').value;
+ let reqs=JSON.parse(localStorage.getItem('sufra_requests')||'[]'); reqs.push({...myRest,reqPlan:plan,date:new Date().toISOString()}); localStorage.setItem('sufra_requests',JSON.stringify(reqs));
+ sendWA('sub'); alert('تم إرسال طلبك ✅ بيوصلك للمالك في الموقع والواتساب');
+}
+function goLogin(){ location.href='login.html'; }
 </script></body></html>
