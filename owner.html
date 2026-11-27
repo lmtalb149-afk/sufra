@@ -18,6 +18,7 @@
 <div id="mainBox" style="display:none">
 <h1>🍽️ لوحة المالك - سفرة</h1>
 <p>أهلاً <b id="ownerNameDisplay">أسامة</b> 👋 <button onclick="logout()">خروج</button></p>
+  <div class="card"><h2>🔔 طلبات الاشتراك الجديدة - توصلك هنا + واتساب</h2><div id="reqList"></div></div>
 
 <div class="card">
 <h2>⚙️ الإعدادات</h2>
@@ -106,5 +107,13 @@ function render(){
   restaurants.forEach((r,i)=>{ let end=new Date(r.end); let diff=Math.ceil((end-new Date())/(1000*60*60*24)); let planName = r.plan==='trial'?'تجريبي':r.plan==='monthly'?'شهري':r.plan==='3months'?'3 شهور':'سنوي'; let price = r.plan==='trial'?0:prices[r.plan]; html+=`<div class="rest"><div><b>${r.name}</b><br>👤 ${r.owner||''} - 📞 ${r.phone}<br>📦 ${planName} - ${price.toLocaleString()} ر.ي<br>📅 ينتهي: ${end.toLocaleDateString('ar-YE')} - باقي ${diff} يوم<br><span class="badge ${diff>=0?'active':'expired'}">${diff>=0?'نشط ✅':'منتهي ❌'}</span><br>🔑 ${r.user} / ${r.pass}</div><div style="display:flex;flex-direction:column;gap:6px"><button class="btn-green" onclick="renew(${i})">تجديد</button><button class="btn-red" onclick="delRestaurant(${i})">حذف</button></div></div>`; });
   document.getElementById('list').innerHTML=html;
 }
+  function renderReqs(){
+ let reqs=JSON.parse(localStorage.getItem('sufra_requests')||'[]');
+ let h=''; if(!reqs.length) h='<p>لا يوجد طلبات جديدة</p>';
+ reqs.forEach((r,i)=>{ let pn=r.reqPlan==='monthly'?'شهري 15,000':r.reqPlan==='3months'?'3 شهور 40,000':'سنوي 120,000'; h+=`<div class="rest"><div><b>${r.name}</b><br>📞 ${r.phone}<br>📦 طلب: ${pn}<br>📅 ${new Date(r.date).toLocaleDateString('ar-YE')}</div><div style="display:flex;flex-direction:column;gap:6px"><a target="_blank" href="https://wa.me/${r.phone.replace('+','')}?text=${encodeURIComponent('مرحباً، تم قبول طلب اشتراكك في سفرة ✅')}"><button class="btn-green">رد واتساب</button></a><button class="btn-red" onclick="delReq(${i})">حذف الطلب</button></div></div>`; });
+ document.getElementById('reqList').innerHTML=h;
+}
+function delReq(i){ let a=JSON.parse(localStorage.getItem('sufra_requests')||'[]'); a.splice(i,1); localStorage.setItem('sufra_requests',JSON.stringify(a)); renderReqs(); }
+renderReqs();
 render();
 </script></body></html>
