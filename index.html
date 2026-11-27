@@ -12,66 +12,47 @@
 <div id="payInfo" class="paybox"><div id="payText"></div><button class="copybtn" type="button" onclick="copyWallet()">📋 نسخ رقم المحفظة</button>
 <p style="font-size:13px;color:#666">1. حول المبلغ للرقم فوق<br>2. ارفق صورة الاشعار تحت<br>3. اضغط تأكيد</p>
 <label><b>🧾 ارفق صورة الاشعار:</b></label><input id="receipt" type="file" accept="image/*"><img id="receiptPrev" style="width:100%;border-radius:10px;display:none;margin-top:6px"><p id="receiptNote" style="font-size:12px;color:#c00"></p></div>
-<button onclick="confirmOrder()" style="width:100%;background:#25D366;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:17px">تأكيد الطلب عبر واتساب ✅</button></div></div>
+<p id="msgOrder" style="text-align:center;color:green"></p>
+<button onclick="confirmOrder()" style="width:100%;background:#25D366;border:0;padding:14px;border-radius:12px;font-weight:800;font-size:17px">تأكيد الطلب للمطعم ✅</button></div></div>
 <script>
 const BIN_ID = "16cb9e7ed2119866122b";
-const WHATSAPP = "967774907728";
 let WALLETS = {};
-const FALLBACK = [
- {name:"برجر كلاسيك",price:2500,cat:"برجر",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80",desc:"لحم، جبن، خس"},
- {name:"بيتزا مارغريتا",price:3500,cat:"بيتزا",img:"https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80",desc:"جبن موزاريلا، طماطم"},
- {name:"شاورما",price:2000,cat:"سندويتش",img:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&q=80",desc:"دجاج، صوص ثوم"},
- {name:"عصير مانجو",price:1200,cat:"عصائر",img:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=600&q=80",desc:"طازج"},
-];
+const FALLBACK = [{name:"برجر كلاسيك",price:2500,cat:"برجر",img:"https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=600&q=80",desc:"لحم، جبن، خس"},{name:"بيتزا مارغريتا",price:3500,cat:"بيتزا",img:"https://images.unsplash.com/photo-1574071318508-1cdbab80d002?w=600&q=80",desc:"جبن موزاريلا، طماطم"},{name:"شاورما",price:2000,cat:"سندويتش",img:"https://images.unsplash.com/photo-1529006557810-274b9b2fc783?w=600&q=80",desc:"دجاج، صوص ثوم"},{name:"عصير مانجو",price:1200,cat:"عصائر",img:"https://images.unsplash.com/photo-1600271886742-f049cd451bba?w=600&q=80",desc:"طازج"}];
 let menu=[], cart={}, activeCat="الكل";
-function buildPay(){
- let sel=document.getElementById("pay");
- let opts=`<option value="كاش عند الاستلام 💵">💵 كاش عند الاستلام - ادفع لما يجي طلبك</option>`;
- for(let k in WALLETS){opts+=`<option value="${k}">📱 ${k} - ${WALLETS[k]}</option>`}
- sel.innerHTML=opts; showPay();
-}
-function showPay(){
- let v=document.getElementById("pay").value;
- let box=document.getElementById("payInfo");
- if(WALLETS[v]){box.style.display="block"; document.getElementById("payText").innerHTML="حول إلى <b>"+v+"</b><br>رقم المحفظة: <b id='walletNum'>"+WALLETS[v]+"</b><br>الاسم: سفرة";}
- else{box.style.display="none";}
-}
+function buildPay(){let sel=document.getElementById("pay"); let opts=`<option value="كاش عند الاستلام 💵">💵 كاش عند الاستلام - ادفع لما يجي طلبك</option>`; for(let k in WALLETS){opts+=`<option value="${k}">📱 ${k} - ${WALLETS[k]}</option>`} sel.innerHTML=opts; showPay();}
+function showPay(){let v=document.getElementById("pay").value; let box=document.getElementById("payInfo"); if(WALLETS[v]){box.style.display="block"; document.getElementById("payText").innerHTML="حول إلى <b>"+v+"</b><br>رقم المحفظة: <b id='walletNum'>"+WALLETS[v]+"</b><br>الاسم: سفرة";} else{box.style.display="none";}}
 function copyWallet(){let n=document.getElementById("walletNum").textContent; navigator.clipboard.writeText(n); alert("تم نسخ الرقم: "+n);}
-document.getElementById("receipt").onchange=e=>{let f=e.target.files[0]; if(!f) return; let r=new FileReader(); r.onload=()=>{let p=document.getElementById("receiptPrev"); p.src=r.result; p.style.display="block"; document.getElementById("receiptNote").textContent="✅ تم ارفاق الاشعار - بعد ما تفتح الواتساب ارسله مع الرسالة"}; r.readAsDataURL(f);};
-async function load(){
-  try{let r=await fetch("https://api.npoint.io/"+BIN_ID); let j=await r.json(); menu=j.menu||j||FALLBACK; if(j.wallets) WALLETS=j.wallets; document.getElementById("status").textContent="● المنيو محدث من المطعم";}
-  catch(e){ menu=JSON.parse(localStorage.getItem("sufra_menu")||"null")||FALLBACK; WALLETS=JSON.parse(localStorage.getItem("sufra_wallets")||"{}"); }
-  buildPay(); renderCats(); render();
-}
+document.getElementById("receipt").onchange=e=>{let f=e.target.files[0]; if(!f) return; let img=new Image(); let url=URL.createObjectURL(f); img.onload=()=>{let c=document.createElement("canvas"); let max=500; let w=img.width,h=img.height; if(w>max){h=h*max/w; w=max;} c.width=w; c.height=h; c.getContext("2d").drawImage(img,0,0,w,h); let d=c.toDataURL("image/jpeg",0.6); let p=document.getElementById("receiptPrev"); p.src=d; p.style.display="block"; document.getElementById("receiptNote").textContent="✅ تم ارفاق الاشعار";}; img.src=url;};
+async function load(){try{let r=await fetch("https://api.npoint.io/"+BIN_ID); let j=await r.json(); menu=j.menu||FALLBACK; if(j.wallets) WALLETS=j.wallets; document.getElementById("status").textContent="● المنيو محدث من المطعم";}catch(e){ menu=JSON.parse(localStorage.getItem("sufra_menu")||"null")||FALLBACK; WALLETS=JSON.parse(localStorage.getItem("sufra_wallets")||"{}"); } buildPay(); renderCats(); render();}
 function renderCats(){let cats=["الكل",...new Set(menu.map(m=>m.cat||"عام"))]; document.getElementById("cats").innerHTML=cats.map(c=>`<button class="${c===activeCat?"on":""}" onclick="setCat('${c}')">${c}</button>`).join("");}
 function setCat(c){activeCat=c;renderCats();render();}
-function render(){
-  let list=menu.filter(m=>activeCat==="الكل"||m.cat===activeCat);
-  document.getElementById("grid").innerHTML=list.length?list.map((m,i)=>{
-    let idx=menu.indexOf(m); let q=cart[idx]||0;
-    return `<div class="card"><img src="${m.img||'https://via.placeholder.com/400x300?text=سفرة'}"><div class="b"><h3>${m.name}</h3><p>${m.desc||""}</p><div class="price">${m.price} ريال</div><div class="qty"><button onclick="change(${idx},-1)">−</button><b>${q}</b><button onclick="change(${idx},1)">+</button>${q?`<span style="font-size:12px;color:green">✓ في السلة</span>`:""}</div></div></div>`
-  }).join(""):`<div class="empty">لا يوجد منتجات في هذا القسم بعد</div>`;
-  updateBar();
-}
+function render(){let list=menu.filter(m=>activeCat==="الكل"||m.cat===activeCat); document.getElementById("grid").innerHTML=list.length?list.map((m,i)=>{let idx=menu.indexOf(m); let q=cart[idx]||0; return `<div class="card"><img src="${m.img||'https://via.placeholder.com/400x300?text=سفرة'}"><div class="b"><h3>${m.name}</h3><p>${m.desc||""}</p><div class="price">${m.price} ريال</div><div class="qty"><button onclick="change(${idx},-1)">−</button><b>${q}</b><button onclick="change(${idx},1)">+</button>${q?`<span style="font-size:12px;color:green">✓ في السلة</span>`:""}</div></div></div>`}).join(""):`<div class="empty">لا يوجد منتجات في هذا القسم بعد</div>`; updateBar();}
 function change(i,d){cart[i]=(cart[i]||0)+d; if(cart[i]<=0) delete cart[i]; render();}
 function updateBar(){let count=Object.values(cart).reduce((a,b)=>a+b,0); let total=Object.entries(cart).reduce((s,[i,q])=>s+(menu[i].price*q),0); document.getElementById("totalTxt").textContent=`السلة: ${count} صنف`; document.getElementById("totalPrice").textContent=total+" ريال";}
-function openCart(){let html=""; let total=0; for(let i in cart){let m=menu[i],q=cart[i]; total+=m.price*q; html+=`<div class="row"><span>${m.name} × ${q}</span><b>${m.price*q} ريال</b></div>`} if(!html) html=`<p style="text-align:center;color:#888">سلتك فاضية - اضف منتجات</p>`; else html+=`<div class="row"><b>الاجمالي</b><b>${total} ريال</b></div>`; document.getElementById("cartList").innerHTML=html; document.getElementById("modal").classList.add("open");}
+function openCart(){let html=""; let total=0; for(let i in cart){let m=menu[i],q=cart[i]; total+=m.price*q; html+=`<div class="row"><span>${m.name} × ${q}</span><b>${m.price*q} ريال</b></div>`} if(!html) html=`<p style="text-align:center;color:#888">سلتك فاضية</p>`; else html+=`<div class="row"><b>الاجمالي</b><b>${total} ريال</b></div>`; document.getElementById("cartList").innerHTML=html; document.getElementById("modal").classList.add("open");}
 function closeCart(){document.getElementById("modal").classList.remove("open")}
-function confirmOrder(){
+async function confirmOrder(){
   let name=document.getElementById("cname").value.trim(), phone=document.getElementById("cphone").value.trim();
   if(!Object.keys(cart).length) return alert("السلة فاضية");
   if(!name) return alert("اكتب اسمك");
   let pay=document.getElementById("pay").value;
   let hasReceipt=document.getElementById("receipt").files.length>0;
-  if(WALLETS[pay] && !hasReceipt){ if(!confirm("ما ارفقت صورة الاشعار! هل تريد الاكمال بدونها؟")) return; }
-  let lines=[`طلب جديد من سفرة 🍽️`,`الاسم: ${name}`,`الجوال: ${phone}`,`الطاولة: ${document.getElementById("ctable").value||"-"}`,`طريقة الدفع: ${pay}`];
-  if(WALLETS[pay]){lines.push(`رقم المحفظة: ${WALLETS[pay]}`); lines.push(`الاشعار: ${hasReceipt?"✅ مرفق - سأرسله الآن":"⚠️ سأرسله بعد قليل"}`);}
-  lines.push(`---`);
-  let total=0;
-  for(let i in cart){let m=menu[i],q=cart[i]; total+=m.price*q; lines.push(`${m.name} × ${q} = ${m.price*q} ريال`)}
-  lines.push(`---`); lines.push(`الاجمالي: ${total} ريال`); lines.push(`ملاحظات: ${document.getElementById("cnote").value||"-"}`);
-  window.open("https://wa.me/"+WHATSAPP+"?text="+encodeURIComponent(lines.join("\n"))," _blank");
-  if(WALLETS[pay]) setTimeout(()=>alert("📎 الآن في الواتساب: اضغط على زر الارفاق (+) وارسل صورة الاشعار للمالك"),500);
+  if(WALLETS[pay] && !hasReceipt){ if(!confirm("ما ارفقت صورة الاشعار! تكمل بدونها؟")) return; }
+  let total=0; let items=[];
+  for(let i in cart){let m=menu[i],q=cart[i]; total+=m.price*q; items.push({name:m.name,q:q,price:m.price})}
+  let receiptData=document.getElementById("receiptPrev").src||"";
+  if(receiptData.includes("placeholder")) receiptData="";
+  let order={id:Date.now(),name,phone,table:document.getElementById("ctable").value||"-",note:document.getElementById("cnote").value||"-",pay,wallet:WALLETS[pay]||"",total,items,receipt:receiptData,time:new Date().toLocaleString("ar-YE"),status:"جديد 🆕"};
+  document.getElementById("msgOrder").textContent="جارٍ ارسال الطلب للمطعم...";
+  try{
+    let r=await fetch("https://api.npoint.io/"+BIN_ID); let j=await r.json();
+    let orders=j.orders||[]; orders.unshift(order);
+    if(orders.length>20) orders=orders.slice(0,20);
+    await fetch("https://api.npoint.io/"+BIN_ID,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({menu:j.menu||menu,wallets:j.wallets||WALLETS,orders})});
+    cart={}; render();
+    alert("✅ تم ارسال طلبك للمطعم! رقم طلبك: "+order.id);
+    closeCart();
+  }catch(e){ alert("⚠️ فشل ارسال الطلب - حاول مرة ثانية"); }
 }
 load();
 </script></body></html>
