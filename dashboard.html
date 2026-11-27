@@ -1,27 +1,32 @@
 <!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>لوحة تحكم سفرة</title>
-<style>body{font-family:system-ui;background:#f5f5f5;padding:14px;max-width:700px;margin:auto}h1{text-align:center}.box{background:#fff;padding:14px;border-radius:14px;margin:10px 0}input,select{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px;font-size:16px;box-sizing:border-box}button{padding:12px 16px;border:0;border-radius:10px;font-weight:800;cursor:pointer}.add{background:#111;color:#fff;width:100%}.save{background:#25D366;width:100%;font-size:17px;margin-top:10px}.item{display:flex;gap:10px;background:#fff;padding:10px;border-radius:12px;margin:8px 0;align-items:center}.item img{width:70px;height:70px;object-fit:cover;border-radius:10px}.del{background:#ff4444;color:#fff}</style></head>
+<style>body{font-family:system-ui;background:#f5f5f5;padding:14px;max-width:700px;margin:auto}h1{text-align:center}.box{background:#fff;padding:14px;border-radius:14px;margin:10px 0}input{width:100%;padding:12px;margin:6px 0;border:1px solid #ddd;border-radius:10px;font-size:16px;box-sizing:border-box}button{padding:12px 16px;border:0;border-radius:10px;font-weight:800;cursor:pointer}.add{background:#111;color:#fff;width:100%}.save{background:#25D366;width:100%;font-size:17px;margin-top:10px}.item{display:flex;gap:10px;background:#fff;padding:10px;border-radius:12px;margin:8px 0;align-items:center}.item img{width:70px;height:70px;object-fit:cover;border-radius:10px}.del{background:#ff4444;color:#fff}textarea{width:100%;padding:10px;border:1px solid #ddd;border-radius:10px;box-sizing:border-box}label{font-weight:800;font-size:14px}</style></head>
 <body><h1>🍽️ لوحة تحكم سفرة</h1>
+<div class="box"><h3>💳 أرقام المحافظ - صاحب المطعم يعدلها من هنا</h3>
+<label>الكريمي جوالي</label><input id="w_kuraimi" placeholder="مثال: 774907728">
+<label>ون كاش OneCash</label><input id="w_onecash" placeholder="مثال: 774907728">
+<label>محفظة جيب Jib</label><input id="w_jib" placeholder="مثال: 774907728">
+<label>محفظة فلوسك Flusak</label><input id="w_flusak" placeholder="مثال: 774907728">
+<p style="font-size:13px;color:#888">اذا محفظة ما عندك اتركها فاضية - ما بتظهر للزبون</p></div>
 <div class="box"><h3>➕ أضف منتج جديد</h3>
-<input id="pname" placeholder="اسم المنتج - مثال: برجر"><input id="pprice" type="number" placeholder="السعر - مثال: 2500"><input id="pcat" placeholder="التصنيف - مثال: برجر / بيتزا / عصائر"><input id="pdesc" placeholder="وصف (اختياري)"><label>صورة المنتج:</label><input id="pimg" type="file" accept="image/*"><img id="preview" style="width:100%;border-radius:10px;display:none"><button class="add" onclick="addDish()">إضافة للمنيو ✅</button></div>
+<input id="pname" placeholder="اسم المنتج"><input id="pprice" type="number" placeholder="السعر"><input id="pcat" placeholder="التصنيف - مثال: برجر / بيتزا"><input id="pdesc" placeholder="وصف (اختياري)"><label>صورة المنتج:</label><input id="pimg" type="file" accept="image/*"><img id="preview" style="width:100%;border-radius:10px;display:none"><button class="add" onclick="addDish()">إضافة للمنيو ✅</button></div>
 <div id="list"></div>
 <button class="save" onclick="saveToCloud()">💾 حفظ ونشر للزبائن</button>
-<p id="msg" style="text-align:center"></p><p style="text-align:center"><a href="index.html">فتح صفحة الزبون 👁️</a></p>
+<p id="msg" style="text-align:center"></p><textarea id="manual" style="display:none;height:120px" readonly onclick="this.select()"></textarea><p style="text-align:center"><a href="index.html">فتح صفحة الزبون 👁️</a></p>
 <script>
 const BIN_ID="16cb9e7ed2119866122b";
 let menu=JSON.parse(localStorage.getItem("sufra_menu")||"[]");
+let wallets=JSON.parse(localStorage.getItem("sufra_wallets")||"{}");
 let imgData="";
-document.getElementById("pimg").onchange=e=>{let r=new FileReader();r.onload=()=>{imgData=r.result;let p=document.getElementById("preview");p.src=imgData;p.style.display="block"};r.readAsDataURL(e.target.files[0])};
-function addDish(){
- let n=document.getElementById("pname").value.trim(), pr=+document.getElementById("pprice").value;
- if(!n||!pr) return alert("اكتب الاسم والسعر");
- menu.push({name:n,price:pr,cat:document.getElementById("pcat").value.trim()||"عام",desc:document.getElementById("pdesc").value,img:imgData||"https://via.placeholder.com/400x300?text="+encodeURIComponent(n)});
- localStorage.setItem("sufra_menu",JSON.stringify(menu)); imgData=""; document.getElementById("pname").value="";document.getElementById("pprice").value="";document.getElementById("pimg").value="";document.getElementById("preview").style.display="none"; render();
-}
+function fillWallets(){document.getElementById("w_kuraimi").value=wallets["الكريمي جوالي"]||"";document.getElementById("w_onecash").value=wallets["ون كاش OneCash"]||"";document.getElementById("w_jib").value=wallets["محفظة جيب Jib"]||"";document.getElementById("w_flusak").value=wallets["محفظة فلوسك Flusak"]||""}
+document.getElementById("pimg").onchange=e=>{
+ let file=e.target.files[0]; if(!file) return; let img=new Image(); let url=URL.createObjectURL(file);
+ img.onload=()=>{let c=document.createElement("canvas"); let max=500; let w=img.width,h=img.height; if(w>max){h=h*max/w; w=max;} c.width=w; c.height=h; c.getContext("2d").drawImage(img,0,0,w,h); imgData=c.toDataURL("image/jpeg",0.7); let p=document.getElementById("preview"); p.src=imgData; p.style.display="block";}; img.src=url;
+};
+function addDish(){let n=document.getElementById("pname").value.trim(), pr=+document.getElementById("pprice").value; if(!n||!pr) return alert("اكتب الاسم والسعر"); menu.push({name:n,price:pr,cat:document.getElementById("pcat").value.trim()||"عام",desc:document.getElementById("pdesc").value,img:imgData||"https://via.placeholder.com/400x300?text="+encodeURIComponent(n)}); localStorage.setItem("sufra_menu",JSON.stringify(menu)); imgData=""; document.getElementById("pname").value="";document.getElementById("pprice").value="";document.getElementById("pimg").value="";document.getElementById("preview").style.display="none"; render();}
 function del(i){if(confirm("حذف؟")){menu.splice(i,1);localStorage.setItem("sufra_menu",JSON.stringify(menu));render()}}
 function render(){document.getElementById("list").innerHTML="<h3>المنيو الحالي ("+menu.length+")</h3>"+menu.map((m,i)=>`<div class="item"><img src="${m.img}"><div style="flex:1"><b>${m.name}</b><br>${m.price} ريال - ${m.cat}</div><button class="del" onclick="del(${i})">حذف</button></div>`).join("")}
-async function saveToCloud(){
- document.getElementById("msg").textContent="جارٍ النشر...";
- try{let r=await fetch("https://api.npoint.io/"+BIN_ID,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({menu})}); if(!r.ok) throw 0; document.getElementById("msg").textContent="✅ تم النشر! الزبائن بيشوفون المنيو الجديد الآن"}catch(e){document.getElementById("msg").textContent="❌ فشل النشر - تأكد من الـ ID"}}
-async function loadCloud(){try{let r=await fetch("https://api.npoint.io/"+BIN_ID); let j=await r.json(); if(j.menu){menu=j.menu;localStorage.setItem("sufra_menu",JSON.stringify(menu))}}catch(e){} render()}
-loadCloud();
+function getWallets(){let w={}; let a=document.getElementById("w_kuraimi").value.trim(),b=document.getElementById("w_onecash").value.trim(),c=document.getElementById("w_jib").value.trim(),d=document.getElementById("w_flusak").value.trim(); if(a)w["الكريمي جوالي"]=a; if(b)w["ون كاش OneCash"]=b; if(c)w["محفظة جيب Jib"]=c; if(d)w["محفظة فلوسك Flusak"]=d; return w}
+async function saveToCloud(){wallets=getWallets(); localStorage.setItem("sufra_wallets",JSON.stringify(wallets)); localStorage.setItem("sufra_menu",JSON.stringify(menu)); document.getElementById("msg").textContent="جارٍ النشر..."; try{let r=await fetch("https://api.npoint.io/"+BIN_ID,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({menu,wallets})}); if(!r.ok) throw 0; document.getElementById("msg").textContent="✅ تم النشر!";}catch(e){let txt=JSON.stringify({menu,wallets}); document.getElementById("msg").textContent="⚠️ انسخ النص والصقه في npoint يدوياً"; let m=document.getElementById("manual"); m.style.display="block"; m.value=txt;}}
+async function loadCloud(){try{let r=await fetch("https://api.npoint.io/"+BIN_ID); let j=await r.json(); if(j.menu)menu=j.menu; if(j.wallets)wallets=j.wallets; localStorage.setItem("sufra_menu",JSON.stringify(menu)); localStorage.setItem("sufra_wallets",JSON.stringify(wallets));}catch(e){} fillWallets(); render()}
+loadCloud(); fillWallets();
 </script></body></html>
