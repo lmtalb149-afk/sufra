@@ -1,17 +1,14 @@
-<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>طلبات المطعم</title>
-<style>body{font-family:system-ui;background:#f5f5f5;padding:12px;max-width:700px;margin:auto}h1{text-align:center}.order{background:#fff;padding:14px;border-radius:14px;margin:12px 0;box-shadow:0 2px 8px #0001}.order.new{border:2px solid #25D366}.order img{width:100%;border-radius:10px;margin-top:8px}.btn{padding:10px 14px;border:0;border-radius:10px;font-weight:800;margin:4px;cursor:pointer}.ok{background:#25D366}.rej{background:#ff4444;color:#fff}.done{background:#111;color:#fff}</style></head>
-<body><h1>📋 طلبات المطعم</h1><p style="text-align:center"><button class="btn done" onclick="loadOrders()">🔄 تحديث</button> <a href="dashboard.html">لوحة التحكم</a> | <a href="index.html">صفحة الزبون</a></p><p id="count" style="text-align:center"></p><div id="list">جارٍ التحميل...</div><audio id="ding" src="https://actions.google.com/sounds/v1/alarms/digital_watch_alarm_long.ogg"></audio>
+<!DOCTYPE html><html lang="ar" dir="rtl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>طلبات سفرة</title><style>body{font-family:system-ui;background:#f5f5f5;padding:12px;max-width:700px;margin:auto}.card{background:#fff;padding:14px;border-radius:14px;margin:10px 0}button{padding:10px 14px;border:0;border-radius:10px;font-weight:800;cursor:pointer}.done{background:#25D366}.del{background:#ff4444;color:#fff}img{max-width:100%;border-radius:10px}</style></head>
+<body><h1 style="text-align:center">📋 طلبات سفرة</h1><p style="text-align:center"><button onclick="load()">🔄 تحديث</button> <a href="dashboard.html"><button>لوحة التحكم</button></a></p><p id="status" style="text-align:center"></p><div id="list"></div>
 <script>
-const BIN_ID="16cb9e7ed2119866122b";
-let lastCount=0;
-async function loadOrders(){
- try{let r=await fetch("https://api.npoint.io/"+BIN_ID); let j=await r.json(); let orders=j.orders||[];
- document.getElementById("count").textContent="عدد الطلبات: "+orders.length;
- if(orders.length>lastCount && lastCount!==0){document.getElementById("ding").play(); alert("🔔 طلب جديد وصل!")}
- lastCount=orders.length;
- document.getElementById("list").innerHTML=orders.length?orders.map((o,i)=>`<div class="order ${o.status.includes("جديد")?"new":""}"><b>طلب #${o.id}</b> - ${o.time} - <b>${o.status}</b><br>👤 ${o.name} - 📞 ${o.phone} - 🪑 طاولة: ${o.table}<br>💳 الدفع: ${o.pay} ${o.wallet?"- محفظة: "+o.wallet:""}<br>${o.items.map(it=>`${it.name} × ${it.q} = ${it.price*it.q} ريال`).join("<br>")}<br><b>الاجمالي: ${o.total} ريال</b><br>ملاحظات: ${o.note}<br>${o.receipt?`<b>🧾 صورة الاشعار:</b><img src="${o.receipt}">`:`<span style="color:#999">بدون اشعار - كاش</span>`}<br><button class="btn ok" onclick="setStatus(${i},'تم القبول ✅')">قبول ✅</button><button class="btn done" onclick="setStatus(${i},'تم التجهيز 🍽️')">تم التجهيز</button><button class="btn rej" onclick="setStatus(${i},'مرفوض ❌')">رفض</button><button class="btn" onclick="delOrder(${i})">حذف 🗑️</button></div>`).join(""):"<p style='text-align:center'>لا توجد طلبات بعد</p>";
- }catch(e){document.getElementById("list").textContent="خطأ في التحميل"}}
-async function setStatus(i,s){let r=await fetch("https://api.npoint.io/"+BIN_ID); let j=await r.json(); j.orders[i].status=s; await fetch("https://api.npoint.io/"+BIN_ID,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(j)}); loadOrders();}
-async function delOrder(i){if(!confirm("حذف الطلب؟"))return; let r=await fetch("https://api.npoint.io/"+BIN_ID); let j=await r.json(); j.orders.splice(i,1); await fetch("https://api.npoint.io/"+BIN_ID,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(j)}); loadOrders();}
-loadOrders(); setInterval(loadOrders,10000);
+const BIN_ID="6b08ef651b390e1b559a6825";
+const API_KEY="$2a$10$mbHV9CAClVSa6jhqWDi1Re/ZkrGge9deNP5Cm8WVs.MSxc8XqVqGS";
+const H={"X-Master-Key":API_KEY,"Content-Type":"application/json"};
+let data={menu:[],wallets:{},orders:[]};
+async function load(){document.getElementById("status").textContent="جارٍ التحميل..."; try{let r=await fetch("https://api.jsonbin.io/v3/b/"+BIN_ID+"/latest",{headers:{"X-Master-Key":API_KEY}}); let j=await r.json(); data=j.record||data; document.getElementById("status").textContent=""; render();}catch(e){document.getElementById("status").textContent="❌ خطأ في التحميل - حدث الصفحة"}}
+function render(){let o=data.orders||[]; document.getElementById("list").innerHTML=o.length?o.map((x,i)=>`<div class="card"><b>${x.name}</b> - ${x.phone}<br>📍 ${x.address||""}<br>💳 ${x.pay} - الإجمالي: <b>${x.total} ريال</b><br>🕒 ${x.time}<br><br>${x.items.map(it=>it.name+" × "+it.qty).join("<br>")}${x.receipt?`<br><br>📸 اشعار التحويل:<br><img src="${x.receipt}">`:""}<br><br><button class="done" onclick="doneOrder(${i})">✅ تم ✅</button> <button class="del" onclick="delOrder(${i})">حذف</button></div>`).join(""):"<p style='text-align:center'>لا توجد طلبات بعد</p>"}
+async function save(){await fetch("https://api.jsonbin.io/v3/b/"+BIN_ID,{method:"PUT",headers:H,body:JSON.stringify(data)}); render()}
+async function doneOrder(i){data.orders[i].status="تم"; await save()}
+async function delOrder(i){if(confirm("حذف الطلب؟")){data.orders.splice(i,1); await save()}}
+load(); setInterval(load,30000);
 </script></body></html>
